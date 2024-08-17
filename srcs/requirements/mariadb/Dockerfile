@@ -1,6 +1,11 @@
-FROM alpine:3.19.1
+FROM alpine:3.19
 
-RUN	apk add mysql mysql-client \
-	&& rc-service mariadb setup \
-	&& mysql_secure_installation \
-	&& rc-update add mariadb default
+RUN	apk update && apk add bash mariadb mariadb-client
+
+ADD tools/entrypoint.sh /usr/local/bin/entrypoint.sh
+
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
+EXPOSE 3306
+
+CMD ["/usr/local/bin/entrypoint.sh"]

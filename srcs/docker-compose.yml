@@ -1,43 +1,83 @@
 services:
   nginx:
-    image:  requirements/nginx
+    container_name: nginx
+    build: 
+      context: ./requirements/nginx
+    environment:
+      WORDPRESS_DB_HOST: mariadb:3306
+      WORDPRESS_DB_NAME: wordpress
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD_FILE: /run/secrets/db_password
     networks:
       - docker-network
     volumes:
-      - wordpress-data
+      - wordpress-data:/usr/share/webapps/
     depends_on:
       - wordpress
+    ports:
+      - "443:443"
+    expose:
+      - "9000"
+    secrets:
+      - db_password
+      - server_key
+      - server_cert
 
   mariadb:
-    image:  requirements/mariadb
+    container_name: mariadb
+    build: 
+      context: ./requirements/mariadb
     networks:
       - docker-network
-      volumes:
-      - mariadb-data
+    volumes:
+      - db-data:/var/lib/mysql
+    environment:
+      PORT: "3306"
+      MARIADB_ROOT_PASSWORD_FILE: /run/secrets/db_root_password
+      MARIADB_DATABASE: wordpress
+      MARIADB_USER: wordpress
+      MARIADB_PASSWORD_FILE: /run/secrets/db_password
+    expose:
+      - "3306"
     secrets:
       - db_password
       - db_root_password
 
   wordpress:
-    image:  requirements/wordpress
+    depends_on:
+      - mariadb
+    container_name: wordpress
+    build:
+      context: ./requirements/wordpress
+      network: host
+    environment:
+      WORDPRESS_DB_HOST: mariadb:3306
+      WORDPRESS_DB_NAME: wordpress
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD_FILE: /run/secrets/db_password
     networks:
       - docker-network
     volumes:
-      - wordpress-data
-    depends_on:
-      - mariadb
+      - wordpress-data:/usr/share/webapps/
+    expose:
+      - "3306"
+      - "9000"
+    secrets:
+      - db_password
 
 volumes:
-  mariadb-data:
-    driver: local
+  db-data:
   wordpress-data:
-    driver: local
 
 networks:
   docker-network: {}
 
 secrets:
   db_password:
-    file: ./secrets/db_password.txt
+    file: ../secrets/db_password.txt
   db_root_password:
-    file: ./secrets/db_root_password.txt
+    file: ../secrets/db_root_password.txt
+  server_key:
+    file: ../secrets/server.key
+  server_cert:
+    file: ../secrets/server.crt
