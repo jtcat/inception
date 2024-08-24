@@ -32,4 +32,6 @@ sed -i -r "s/DB_PASSWORD_PW/$(cat $WORDPRESS_DB_PASSWORD_FILE)/1" wp-config.php
 
 wp core install --allow-root --url=joaoteix.42.fr --title="Inception" --admin_user=wpcli --admin_password=wpcli --admin_email=info@wp-cli.org
 
+wp user create writer writer@42.fr --role=author --user_pass=$(cat /run/secrets/wp_author_password)
+
 exec php-fpm82 -RF

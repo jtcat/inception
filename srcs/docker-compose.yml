@@ -1,3 +1,5 @@
+name: inception
+
 services:
   nginx:
     container_name: nginx
@@ -64,6 +66,7 @@ services:
       - "9000"
     secrets:
       - db_password
+      - wp_author_password
 
 volumes:
   db-data:
@@ -71,18 +74,20 @@ volumes:
     driver_opts:
       type: none
       o: bind
-      device: /home/${USER}/db-data
+      device: /home/${USER}/data/db-data
   wordpress-data:
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: /home/${USER}/wordpress-data
+      device: /home/${USER}/data/wordpress-data
 
 networks:
   docker-network: {}
 
 secrets:
+  wp_author_password:
+    file: ../secrets/wp_author_password.txt
   db_password:
     file: ../secrets/db_password.txt
   db_root_password:
