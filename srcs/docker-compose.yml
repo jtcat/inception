@@ -23,16 +23,11 @@ services:
     container_name: mariadb
     build: 
       context: ./requirements/mariadb
+    env_file: mariadb.env
     networks:
       - docker-network
     volumes:
       - db-data:/var/lib/mysql
-    environment:
-      PORT: "3306"
-      MARIADB_ROOT_PASSWORD_FILE: /run/secrets/db_root_password
-      MARIADB_DATABASE: wordpress
-      MARIADB_USER: wordpress
-      MARIADB_PASSWORD_FILE: /run/secrets/db_password
     expose:
       - "3306"
     healthcheck:
@@ -51,12 +46,7 @@ services:
     container_name: wordpress
     build:
       context: ./requirements/wordpress
-      network: host
-    environment:
-      WORDPRESS_DB_HOST: mariadb:3306
-      WORDPRESS_DB_NAME: wordpress
-      WORDPRESS_DB_USER: wordpress
-      WORDPRESS_DB_PASSWORD_FILE: /run/secrets/db_password
+    env_file: wordpress.env
     networks:
       - docker-network
     volumes:
