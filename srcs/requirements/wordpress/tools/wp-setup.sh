@@ -20,6 +20,16 @@ sed -i "s|;*max_file_uploads =.*|max_file_uploads = ${PHP_MAX_FILE_UPLOAD}|i" /e
 sed -i "s|;*post_max_size =.*|post_max_size = ${PHP_MAX_POST}|i" /etc/php82/php.ini
 sed -i "s|;*cgi.fix_pathinfo=.*|cgi.fix_pathinfo= ${PHP_CGI_FIX_PATHINFO}|i" /etc/php82/php.ini
 
+cd /usr/share/webapps/joaoteix.42.fr
+
+sed -i -r "s/DB_NAME_PW/$WORDPRESS_DB_NAME/1" wp-config.php
+sed -i -r "s/DB_USER_PW/$WORDPRESS_DB_USER/1" wp-config.php
+sed -i -r "s/DB_HOST_PW/$WORDPRESS_DB_HOST/1" wp-config.php
+sed -i -r "s/DB_PASSWORD_PW/$(cat $WORDPRESS_DB_PASSWORD_FILE)/1" wp-config.php
+#sed -i -r "s/DB_PASSWORD_PW/ananas/1" wp-config.php
+
 #ln -s /usr/share/webapps/wordpress/ /var/www/localhost/htdocs/wordpress
 
-exec "$@"
+wp core install --allow-root --url=joaoteix.42.fr --title="Inception" --admin_user=wpcli --admin_password=wpcli --admin_email=info@wp-cli.org
+
+exec php-fpm82 -RF

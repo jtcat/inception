@@ -3,11 +3,6 @@ services:
     container_name: nginx
     build: 
       context: ./requirements/nginx
-    environment:
-      WORDPRESS_DB_HOST: mariadb:3306
-      WORDPRESS_DB_NAME: wordpress
-      WORDPRESS_DB_USER: wordpress
-      WORDPRESS_DB_PASSWORD_FILE: /run/secrets/db_password
     networks:
       - docker-network
     volumes:
@@ -19,7 +14,6 @@ services:
     expose:
       - "9000"
     secrets:
-      - db_password
       - server_key
       - server_cert
 
@@ -39,13 +33,19 @@ services:
       MARIADB_PASSWORD_FILE: /run/secrets/db_password
     expose:
       - "3306"
+    healthcheck:
+      test: ["CMD", "db_ready"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
     secrets:
       - db_password
       - db_root_password
 
   wordpress:
     depends_on:
-      - mariadb
+      mariadb:
+        condition: service_healthy
     container_name: wordpress
     build:
       context: ./requirements/wordpress
@@ -67,7 +67,17 @@ services:
 
 volumes:
   db-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/${USER}/db-data
   wordpress-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/${USER}/wordpress-data
 
 networks:
   docker-network: {}

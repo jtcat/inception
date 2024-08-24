@@ -65,7 +65,7 @@ exec_client <<-ESQL
 	SET @@SESSION.SQL_LOG_BIN=@orig_sql_log_bin;
 	-- create users/databases
 	CREATE DATABASE IF NOT EXISTS \`$MARIADB_DATABASE\`;
-	CREATE USER '$MARIADB_USER'@'%' IDENTIFIED BY '${userPasswordEscaped}' ;
+	CREATE USER IF NOT EXISTS '$MARIADB_USER'@'%' IDENTIFIED BY '${userPasswordEscaped}' ;
 	GRANT ALL ON \`${MARIADB_DATABASE//_/\\_}\`.* TO '$MARIADB_USER'@'%';
 ESQL
 
